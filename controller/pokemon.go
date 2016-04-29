@@ -23,5 +23,5 @@ func (p *Pokemon) All() []model.Pokemon {
 // literal like:
 // controller := Pokemon{C: collection}
 func NewPokemon(db *mgo.Database) *Pokemon {
-	return &Pokemon{C: db.C("Pokemon")}
+	return &Pokemon{C: db.C("pokemon")}
 }
