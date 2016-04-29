@@ -8,3 +8,12 @@ type Stat struct {
 	SpecialDefense int32 `json:"special_defense" bson:"special_defense"`
 	Speed          int32 `json:"speed" bson:"speed"`
 }
+
+func (s *Stat) valid() bool {
+	return (s.Hp != 0 &&
+		s.Attack != 0 &&
+		s.Defense != 0 &&
+		s.SpecialAttack != 0 &&
+		s.SpecialDefense != 0 &&
+		s.Speed != 0)
+}

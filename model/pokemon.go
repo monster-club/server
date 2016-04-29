@@ -37,5 +37,6 @@ func (p *Pokemon) valid() bool {
 		p.Height != 0.0 &&
 		p.Weight != 0.0 &&
 		(p.Ratio >= 0.0 && p.Ratio <= 100.0) &&
-		p.DexNum != 0)
+		p.DexNum != 0 &&
+		p.Stats.valid())
 }

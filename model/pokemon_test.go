@@ -20,6 +20,7 @@ func pokemonFactory() Pokemon {
 		Weight: 1.0,
 		Ratio: 87.5,
 		DexNum: 1,
+		Stats: Stat{1, 1, 1, 1, 1, 1},
 	}
 }
 
