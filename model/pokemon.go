@@ -8,20 +8,20 @@ type Pokemon struct {
 	ID         bson.ObjectId `json:"_id,omitempty" bson:"_id,omitempty"`
 	Name       string        `json:"name" bson:"name"`
 	Abilities  []int32       `json:"abilities" bson:"abilities"`
-	EggGroups  []int32       `json:"egg_groups" bson:"egg_groups"`
-	EvYield    []int32       `json:"ev_yield" bson:"ev_yield"`
+	EggGroups  []int32       `json:"eggGroups" bson:"egg_groups"`
+	EvYield    []int32       `json:"evYield" bson:"ev_yield"`
 	Types      []int32       `json:"types" bson:"types"`
 	Evolutions []Evolution   `json:"evolutions" bson:"evolutions"`
 	Moves      []Move        `json:"moves" bson:"moves"`
-	CatchRate  int32         `json:"catch_rate" bson:"catch_rate"`
-	EggCycles  int32         `json:"egg_cycles" bson:"egg_cycles"`
+	CatchRate  int32         `json:"catchRate" bson:"catch_rate"`
+	EggCycles  int32         `json:"eggCycles" bson:"egg_cycles"`
 	Happiness  int32         `json:"happiness" bson:"happiness"`
 	Exp        int32         `json:"exp" bson:"exp"`
-	GrowthRate string        `json:"growth_rate" bson:"growth_rate"`
+	GrowthRate string        `json:"growthRate" bson:"growth_rate"`
 	Height     float64       `json:"height" bson:"height"`
 	Weight     float64       `json:"weight" bson:"weight"`
 	Ratio      float64       `json:"ratio" bson:"ratio"`
-	DexNum     int32         `json:"dex_num" bson:"dex_num"`
+	DexNum     int32         `json:"dexNum" bson:"dex_num"`
 	Stats      Stat          `json:"stats" bson:"stats"`
 }
 
