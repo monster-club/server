@@ -30,13 +30,13 @@ func (p *Pokemon) valid() bool {
 		(eggGroupsLen >= 1 && eggGroupsLen <= 2) &&
 		(typesLen >= 1 && typesLen <= 2) &&
 		len(p.Moves) != 0 &&
-		p.CatchRate != 0 &&
-		p.EggCycles != 0 &&
-		p.Exp != 0 &&
+		p.CatchRate > 0 &&
+		p.EggCycles > 0 &&
+		p.Exp > 0 &&
 		p.GrowthRate != ""&&
-		p.Height != 0.0 &&
-		p.Weight != 0.0 &&
+		p.Height > 0.0 &&
+		p.Weight > 0.0 &&
 		(p.Ratio >= 0.0 && p.Ratio <= 100.0) &&
-		p.DexNum != 0 &&
+		p.DexNum > 0 &&
 		p.Stats.valid())
 }

@@ -7,10 +7,18 @@ import (
 func statFactory() Stat {
 	return Stat{
 		Hp: 1,
+		Attack: 1,
 		Defense: 1,
 		SpecialAttack: 1,
 		SpecialDefense: 1,
 		Speed: 1,
+	}
+}
+
+func TestStatValidity(t *testing.T) {
+	s := statFactory()
+	if s.valid() == false {
+		t.Error("Expected stats to be valid.")
 	}
 }
 

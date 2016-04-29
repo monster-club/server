@@ -10,10 +10,10 @@ type Stat struct {
 }
 
 func (s *Stat) valid() bool {
-	return (s.Hp != 0 &&
-		s.Attack != 0 &&
-		s.Defense != 0 &&
-		s.SpecialAttack != 0 &&
-		s.SpecialDefense != 0 &&
-		s.Speed != 0)
+	return (s.Hp > 0 &&
+		s.Attack > 0 &&
+		s.Defense > 0 &&
+		s.SpecialAttack > 0 &&
+		s.SpecialDefense > 0 &&
+		s.Speed > 0)
 }
