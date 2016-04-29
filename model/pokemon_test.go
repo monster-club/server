@@ -11,7 +11,7 @@ func pokemonFactory() Pokemon {
 		Abilities:  []int32{1, 2},
 		EggGroups:  []int32{1},
 		Types:      []int32{1},
-		Moves:      []Move{Move{Learn: "a", Level: 1, Num: 1}},
+		Moves:      []LearnSet{LearnSet{Learn: "a", Level: 1, Num: 1}},
 		CatchRate:  1,
 		EggCycles:  1,
 		Exp:        1,
@@ -74,7 +74,7 @@ func TestEggGroupsMustNotBeGreaterThanTwo(t *testing.T) {
 
 func TestMovesMustBeAtLeastOne(t *testing.T) {
 	p := pokemonFactory()
-	p.Moves = []Move{}
+	p.Moves = []LearnSet{}
 	if p.Valid() == true {
 		t.Error("Pokemon should not be valid if they have no moves.")
 	}

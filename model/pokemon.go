@@ -12,7 +12,7 @@ type Pokemon struct {
 	EvYield    []int32       `json:"evYield" bson:"ev_yield"`
 	Types      []int32       `json:"types" bson:"types"`
 	Evolutions []Evolution   `json:"evolutions" bson:"evolutions"`
-	Moves      []Move        `json:"moves" bson:"moves"`
+	Moves      []LearnSet    `json:"moves" bson:"moves"`
 	CatchRate  int32         `json:"catchRate" bson:"catch_rate"`
 	EggCycles  int32         `json:"eggCycles" bson:"egg_cycles"`
 	Happiness  int32         `json:"happiness" bson:"happiness"`
