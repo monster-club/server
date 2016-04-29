@@ -26,6 +26,7 @@ func TestPokemonNew(t *testing.T) {
 
 func TestAllPokemon(t *testing.T) {
 	db := mangoSetup()
+	defer db.DropDatabase()
 	coll := db.C("pokemon")
 	coll.Insert(&model.Pokemon{Name: "Charmander"})
 	cont := Pokemon{C: coll}
@@ -36,5 +37,4 @@ func TestAllPokemon(t *testing.T) {
 	if all[0].Name != "Charmander" {
 		t.Error("The controller did not return data intact.")
 	}
-	db.DropDatabase()
 }
