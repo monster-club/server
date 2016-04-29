@@ -25,7 +25,7 @@ type Pokemon struct {
 	Stats      Stat          `json:"stats" bson:"stats"`
 }
 
-func (p *Pokemon) valid() bool {
+func (p *Pokemon) Valid() bool {
 	abilitiesLen := len(p.Abilities)
 	eggGroupsLen := len(p.EggGroups)
 	typesLen := len(p.Types)
@@ -37,7 +37,7 @@ func (p *Pokemon) valid() bool {
 		p.CatchRate > 0 &&
 		p.EggCycles > 0 &&
 		p.Exp > 0 &&
-		p.GrowthRate != ""&&
+		p.GrowthRate != "" &&
 		p.Height > 0.0 &&
 		p.Weight > 0.0 &&
 		(p.Ratio >= 0.0 && p.Ratio <= 100.0) &&

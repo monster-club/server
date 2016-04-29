@@ -31,10 +31,14 @@ func TestAllPokemon(t *testing.T) {
 	coll.Insert(&model.Pokemon{Name: "Charmander"})
 	cont := Pokemon{C: coll}
 	all := cont.All()
-	if len(all) != 1 {
+	pkm, ok := all.([]model.Pokemon)
+	if !ok {
+		t.Error("Interface could not be convereted to a Pokemon model")
+	}
+	if len(pkm) != 1 {
 		t.Error("The controller did not return all records.")
 	}
-	if all[0].Name != "Charmander" {
+	if pkm[0].Name != "Charmander" {
 		t.Error("The controller did not return data intact.")
 	}
 }

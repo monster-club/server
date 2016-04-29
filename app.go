@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pokemon-club/server/controller"
+	"github.com/pokemon-club/server/router"
 	"gopkg.in/mgo.v2"
 )
 
@@ -13,11 +14,10 @@ func main() {
 		panic(err)
 	}
 	defer sess.Close()
+	db := sess.DB("pokemon")
+	pkmCtrl := controller.NewPokemon(db)
 
-	r.GET("/pokemon", func(c *gin.Context) {
-		cont := controller.Pokemon{sess.DB("pokemon").C("pokemon")}
-		c.JSON(200, cont.All())
-	})
+	r.GET("/pokemon", router.GetAll(pkmCtrl))
 
 	r.Run()
 }

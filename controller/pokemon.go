@@ -9,12 +9,19 @@ type Pokemon struct {
 	C *mgo.Collection
 }
 
-// All is an exported method that returns all documents for a pokemon as
-// Pokemon structs.
-func (p *Pokemon) All() []model.Pokemon {
+// all returns all documents from the pokemon collectino as model.Pokemon
+// structs.
+func (p *Pokemon) all() []model.Pokemon {
 	var results []model.Pokemon
 	_ = p.C.Find(nil).All(&results)
 	return results
+}
+
+// All is an exported method that returns all documents from the pokemon
+// collection as an interface{}. This will need to be cast to a model.Pokemon.
+// All is part of the CRUDController interface.
+func (p *Pokemon) All() interface{} {
+	return p.all()
 }
 
 // NewPokemon is a factory function that creates a new Pokemon controller
