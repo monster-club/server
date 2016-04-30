@@ -8,12 +8,9 @@ import (
 	"testing"
 )
 
-func mangoSetup() *mgo.Database {
+func mangoSetup() (*mgo.Database, error) {
 	sess, err := mgo.Dial("127.0.0.1")
-	if err != nil {
-		panic(err)
-	}
-	return sess.DB("pokemonTest")
+	return sess.DB("pokemonTest"), err
 }
 
 func testInsert(db *mgo.Database) model.Pokemon {
@@ -27,65 +24,85 @@ func testInsert(db *mgo.Database) model.Pokemon {
 }
 
 func TestPokemonNew(t *testing.T) {
-	db := mangoSetup()
-	cont := NewPokemon(db)
-	reflection := reflect.TypeOf(cont)
-	if reflection.String() != "*controller.Pokemon" {
-		t.Error("The factory function created the wrong controller. Created:", reflection)
+	db, err := mangoSetup()
+	if err == nil {
+		cont := NewPokemon(db)
+		reflection := reflect.TypeOf(cont)
+		if reflection.String() != "*controller.Pokemon" {
+			t.Error("The factory function created the wrong controller. Created:", reflection)
+		}
+	} else {
+		t.Error("Unable to create database connection:", err)
 	}
 }
 
 func TestAllPokemon(t *testing.T) {
-	db := mangoSetup()
-	defer db.DropDatabase()
-	_ = testInsert(db)
-	cont := NewPokemon(db)
-	all := cont.All()
-	pkm, ok := all.([]model.Pokemon)
-	if !ok {
-		t.Error("Interface could not be convereted to a Pokemon model")
-	}
-	if len(pkm) != 1 {
-		t.Error("The controller did not return all records.")
-	}
-	if pkm[0].Name != "Charmander" {
-		t.Error("The controller did not return data intact.")
+	db, err := mangoSetup()
+	if err == nil {
+		defer db.DropDatabase()
+		_ = testInsert(db)
+		cont := NewPokemon(db)
+		all := cont.All()
+		pkm, ok := all.([]model.Pokemon)
+		if !ok {
+			t.Error("Interface could not be convereted to a Pokemon model")
+		}
+		if len(pkm) != 1 {
+			t.Error("The controller did not return all records.")
+		}
+		if pkm[0].Name != "Charmander" {
+			t.Error("The controller did not return data intact.")
+		}
+	} else {
+		t.Error("Unable to create database connection:", err)
 	}
 }
 
 func TestFindPokemon(t *testing.T) {
-	db := mangoSetup()
-	defer db.DropDatabase()
-	pkm := testInsert(db)
-	cont := NewPokemon(db)
-	res, err := cont.find(bson.ObjectId.Hex(pkm.ID))
-	if err != nil {
-		t.Error("An error occured retrieving the Pokemon:", err)
-	}
-	if res.Name != "" && res.Name != pkm.Name {
-		t.Error("The Id found the wrong entry.")
+	db, err := mangoSetup()
+	if err == nil {
+		defer db.DropDatabase()
+		pkm := testInsert(db)
+		cont := NewPokemon(db)
+		res, err := cont.find(bson.ObjectId.Hex(pkm.ID))
+		if err != nil {
+			t.Error("An error occured retrieving the Pokemon:", err)
+		}
+		if res.Name != "" && res.Name != pkm.Name {
+			t.Error("The Id found the wrong entry.")
+		}
+	} else {
+		t.Error("Unable to create database connection:", err)
 	}
 }
 
 func TestFindPokemonBadId(t *testing.T) {
-	db := mangoSetup()
-	defer db.DropDatabase()
-	_ = testInsert(db)
-	cont := NewPokemon(db)
-	_, err := cont.find("lolol not a hex id")
+	db, err := mangoSetup()
 	if err == nil {
-		t.Error("An invalid hex id should have raised an error")
+		defer db.DropDatabase()
+		_ = testInsert(db)
+		cont := NewPokemon(db)
+		_, err := cont.find("lolol not a hex id")
+		if err == nil {
+			t.Error("An invalid hex id should have raised an error")
+		}
+	} else {
+		t.Error("Unable to create database connection:", err)
 	}
 }
 
 func TestFindPokemonDatabaseProblem(t *testing.T) {
-	db := mangoSetup()
-	pkm := testInsert(db)
-	cont := NewPokemon(db)
-	// Drop the database early, so no records exist
-	db.DropDatabase()
-	_, err := cont.find(bson.ObjectId.Hex(pkm.ID))
+	db, err := mangoSetup()
 	if err == nil {
-		t.Error("An empty database should have raised an error")
+		pkm := testInsert(db)
+		cont := NewPokemon(db)
+		// Drop the database early, so no records exist
+		db.DropDatabase()
+		_, err := cont.find(bson.ObjectId.Hex(pkm.ID))
+		if err == nil {
+			t.Error("An empty database should have raised an error")
+		}
+	} else {
+		t.Error("Unable to create database connection:", err)
 	}
 }
