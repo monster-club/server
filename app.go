@@ -18,6 +18,7 @@ func main() {
 	pkmCtrl := controller.NewPokemon(db)
 
 	r.GET("/pokemon", router.GetAll(pkmCtrl))
+	r.POST("/pokemon", router.Create(pkmCtrl))
 	r.GET("/pokemon/:id", router.GetOne(pkmCtrl))
 
 	r.Run()

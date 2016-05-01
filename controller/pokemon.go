@@ -32,10 +32,17 @@ func (p *Pokemon) find(id string) (model.Pokemon, error) {
 	}
 }
 
-// Find is a part of the CRUDController interface. It is a passthru for the
-// local "find" method.
-func (p *Pokemon) Find(id string) (interface{}, error) {
-	return p.find(id)
+// insert will create a new document in the collection for the given Pokemon
+// struct, provided the struct is valid. If the struct is invalid, or if there
+// is a database error trying to insert the data, an error will be returned.
+func (p *Pokemon) insert(m *model.Pokemon) (model.Pokemon, error) {
+	if m.Valid() == false {
+		return model.Pokemon{}, errors.New("Invalid data for creation.")
+	} else {
+		m.ID = bson.NewObjectId()
+		err := p.C.Insert(m)
+		return *m, err
+	}
 }
 
 // All is an exported method that returns all documents from the pokemon
@@ -43,4 +50,22 @@ func (p *Pokemon) Find(id string) (interface{}, error) {
 // All is part of the CRUDController interface.
 func (p *Pokemon) All() interface{} {
 	return p.all()
+}
+
+// Find is a part of the CRUDController interface. It is a passthru for the
+// local "find" method.
+func (p *Pokemon) Find(id string) (interface{}, error) {
+	return p.find(id)
+}
+
+
+// Insert is a part of the CRUDController interface. It is a passthru for the
+// local "insert" method.
+func (p *Pokemon) Insert(m interface{}) (interface{}, error) {
+	pkm, ok := m.(*model.Pokemon)
+	if !ok {
+		return model.Pokemon{}, errors.New("Failed to convert interface.")
+	} else {
+		return p.insert(pkm)
+	}
 }

@@ -23,6 +23,26 @@ func testInsert(db *mgo.Database) model.Pokemon {
 	return charmander
 }
 
+// Returns a model.Pokemon struct that will return true from a valid() call
+func pokemonFactory() model.Pokemon {
+	return model.Pokemon{
+		Name:       "Charmander",
+		Abilities:  []int32{1, 2},
+		EggGroups:  []int32{1},
+		Types:      []int32{1},
+		Moves:      []model.LearnSet{model.LearnSet{Learn: "a", Level: 1, Num: 1}},
+		CatchRate:  1,
+		EggCycles:  1,
+		Exp:        1,
+		GrowthRate: "medium_slow",
+		Height:     1.0,
+		Weight:     1.0,
+		Ratio:      87.5,
+		DexNum:     1,
+		Stats:      model.Stat{1, 1, 1, 1, 1, 1},
+	}
+}
+
 func TestPokemonNew(t *testing.T) {
 	db, err := mangoSetup()
 	if err == nil {
@@ -64,15 +84,17 @@ func TestFindPokemon(t *testing.T) {
 		defer db.DropDatabase()
 		pkm := testInsert(db)
 		cont := NewPokemon(db)
-		res, err := cont.find(bson.ObjectId.Hex(pkm.ID))
+		res, err := cont.Find(bson.ObjectId.Hex(pkm.ID))
 		if err != nil {
 			t.Error("An error occured retrieving the Pokemon:", err)
 		}
-		if res.Name != "" && res.Name != pkm.Name {
-			t.Error("The Id found the wrong entry.")
+		found, ok := res.(model.Pokemon)
+		if !ok {
+			t.Error("Interface type could not be convereted to a Pokemon struct")
 		}
-	} else {
-		t.Error("Unable to create database connection:", err)
+		if found.Name != "Charmander" {
+			t.Error("Data did not come out of transformation intact.")
+		}
 	}
 }
 
@@ -104,5 +126,54 @@ func TestFindPokemonDatabaseProblem(t *testing.T) {
 		}
 	} else {
 		t.Error("Unable to create database connection:", err)
+	}
+}
+
+func TestInsertPokemonThrowsAnErrorForInvalidStruct(t *testing.T) {
+	db, err := mangoSetup()
+	if err == nil {
+		defer db.DropDatabase()
+		cont := NewPokemon(db)
+		charmander := model.Pokemon{Name: "Charmander"}
+		_, err := cont.Insert(&charmander)
+		if err == nil {
+			t.Error("An invalid struct should raise an error.", err)
+		}
+	} else {
+		t.Error("Unable to create database connection:", err)
+	}
+}
+
+func TestInsertPokemon(t *testing.T) {
+	db, err := mangoSetup()
+	if err == nil {
+		defer db.DropDatabase()
+		cont := NewPokemon(db)
+		charmander := pokemonFactory()
+		ret, err := cont.Insert(&charmander)
+		if err != nil {
+			t.Error("There was a database error trying to insert.", err)
+		}
+		pkm, ok := ret.(model.Pokemon)
+		if !ok {
+			t.Error("Failed to convert interface to Pokemon struct.", ok)
+		}
+		hex := bson.ObjectId.Hex(pkm.ID)
+		if hex == "" {
+			t.Error("The inserted Pokemon should have an ID.", hex)
+		}
+	}
+}
+
+func TestInsertPokemonBadInterface(t *testing.T) {
+	db, err := mangoSetup()
+	if err == nil {
+		defer db.DropDatabase()
+		cont := NewPokemon(db)
+		wrongThing := Pokemon{}
+		_, err := cont.Insert(wrongThing)
+		if err == nil {
+			t.Error("Should have failed to convert to a Pokemon struct.", err)
+		}
 	}
 }
