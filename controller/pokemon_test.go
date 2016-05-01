@@ -150,7 +150,7 @@ func TestInsertPokemon(t *testing.T) {
 		defer db.DropDatabase()
 		cont := NewPokemon(db)
 		charmander := pokemonFactory()
-		ret, err := cont.Insert(&charmander)
+		ret, err := cont.Insert(charmander)
 		if err != nil {
 			t.Error("There was a database error trying to insert.", err)
 		}

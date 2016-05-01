@@ -28,13 +28,13 @@ func Create(ctrl controller.CRUDController) func(c *gin.Context) {
 	return func(c *gin.Context) {
 		if c.BindJSON(&json) == nil {
 			res, err := ctrl.Insert(json)
-			if err == nil {
-				return c.JSON(200, res)
+			if err != nil {
+				c.JSON(400, gin.H{"error": "Failed to insert data"})
 			} else {
-				return c.JSON(400, gin.H{"error": err})
+				c.JSON(200, res)
 			}
 		} else {
-			return c.JSON(500, gin.H{"error": "Couldn't convert data"})
+			c.JSON(500, gin.H{"error": "Couldn't convert data"})
 		}
 	}
 }

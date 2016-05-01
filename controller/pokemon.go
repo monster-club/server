@@ -58,14 +58,13 @@ func (p *Pokemon) Find(id string) (interface{}, error) {
 	return p.find(id)
 }
 
-
 // Insert is a part of the CRUDController interface. It is a passthru for the
 // local "insert" method.
 func (p *Pokemon) Insert(m interface{}) (interface{}, error) {
-	pkm, ok := m.(*model.Pokemon)
+	pkm, ok := m.(model.Pokemon)
 	if !ok {
 		return model.Pokemon{}, errors.New("Failed to convert interface.")
 	} else {
-		return p.insert(pkm)
+		return p.insert(&pkm)
 	}
 }
