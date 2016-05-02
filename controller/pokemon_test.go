@@ -5,6 +5,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
+	"strconv"
 	"testing"
 )
 
@@ -17,6 +18,14 @@ func testInsert(db *mgo.Database) model.Pokemon {
 	var charmander model.Pokemon
 	charmander.Name = "Charmander"
 	// Force an ID onto the record before hand
+	charmander.ID = bson.NewObjectId()
+	coll := db.C("pokemon")
+	coll.Insert(&charmander)
+	return charmander
+}
+
+func testInsertValid(db *mgo.Database) model.Pokemon {
+	charmander := pokemonFactory()
 	charmander.ID = bson.NewObjectId()
 	coll := db.C("pokemon")
 	coll.Insert(&charmander)
@@ -174,6 +183,29 @@ func TestInsertPokemonBadInterface(t *testing.T) {
 		_, err := cont.Insert(wrongThing)
 		if err == nil {
 			t.Error("Should have failed to convert to a Pokemon struct.", err)
+		}
+	}
+}
+
+func TestUpdatePokemon(t *testing.T) {
+	db, err := mangoSetup()
+	if err == nil {
+		defer db.DropDatabase()
+		pkm := testInsertValid(db)
+		cont := NewPokemon(db)
+		res, err := cont.Update(bson.ObjectId.Hex(pkm.ID), model.Pokemon{Name: "Squirtle"})
+		if err != nil {
+			t.Error("There should not have been a database error:", err)
+		}
+		newPkm, ok := res.(model.Pokemon)
+		if !ok {
+			t.Error("Result should be convertable to a Pokemon struct")
+		}
+		if newPkm.Name != "Squirtle" {
+			t.Error("The model was not updated.")
+		}
+		if newPkm.DexNum == 0 {
+			t.Error("The update mangled existing data, expected "+strconv.Itoa(int(pkm.DexNum))+", got:", newPkm.DexNum)
 		}
 	}
 }
