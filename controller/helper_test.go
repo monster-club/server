@@ -14,14 +14,18 @@ func mangoSetup() *mgo.Database {
 	return sess.DB("pokemonTest")
 }
 
-func testInsert(db *mgo.Database) model.Pokemon {
-	var charmander model.Pokemon
-	charmander.Name = "Charmander"
-	// Force an ID onto the record before hand
-	charmander.ID = bson.NewObjectId()
-	coll := db.C("pokemon")
-	coll.Insert(&charmander)
-	return charmander
+// Returns the three most common things needed in the controller integration test, a database
+// a struct that has been inserted into that database, and a controller reference.
+func standardSetup() (*mgo.Database, *Pokemon) {
+	db := mangoSetup()
+	cont := NewPokemon(db)
+	return db, cont
+}
+
+func standardInsertSetup() (*mgo.Database, model.Pokemon, *Pokemon) {
+	db, cont := standardSetup()
+	pkm := testInsertValid(db)
+	return db, pkm, cont
 }
 
 func testInsertValid(db *mgo.Database) model.Pokemon {
