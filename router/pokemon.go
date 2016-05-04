@@ -13,11 +13,11 @@ func GetAll(ctrl controller.CRUDController) func(c *gin.Context) {
 	}
 }
 
-func GetOne(ctrl controller.CRUDController) func(c *gin.Context) {
+func GetOne(ctrl controller.CRUDController, m model.Document) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		res, err := ctrl.Find(c.Param("id"))
+		res, err := ctrl.Find(c.Param("id"), m)
 		if err != nil {
-			c.JSON(400, gin.H{"error": "Bad id"})
+			c.JSON(400, gin.H{"error": err.Error()})
 		} else {
 			c.JSON(200, res)
 		}
