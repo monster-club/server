@@ -7,6 +7,9 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+// The Pokemon controller struct is an impelmenter of the CRUDController
+// interface. It is intended to be given to a router and handle database
+// interactions.
 type Pokemon struct {
 	C *mgo.Collection
 }
@@ -27,9 +30,8 @@ func (p *Pokemon) find(id string) (model.Pokemon, error) {
 		var result model.Pokemon
 		err := p.C.FindId(bson.ObjectIdHex(id)).One(&result)
 		return result, err
-	} else {
-		return model.Pokemon{}, errors.New("Invalid id provided")
 	}
+	return model.Pokemon{}, errors.New("Invalid id provided")
 }
 
 // insert will create a new document in the collection for the given Pokemon
@@ -38,11 +40,10 @@ func (p *Pokemon) find(id string) (model.Pokemon, error) {
 func (p *Pokemon) insert(m *model.Pokemon) (model.Pokemon, error) {
 	if m.Valid() == false {
 		return model.Pokemon{}, errors.New("Invalid data for creation.")
-	} else {
-		m.ID = bson.NewObjectId()
-		err := p.C.Insert(m)
-		return *m, err
 	}
+	m.ID = bson.NewObjectId()
+	err := p.C.Insert(m)
+	return *m, err
 }
 
 // update will change toe provided keys in the "m" variable. It will also
@@ -52,9 +53,8 @@ func (p *Pokemon) update(id string, m bson.M) (bson.M, error) {
 	if bson.IsObjectIdHex(id) == true {
 		err := p.C.Update(bson.M{"_id": bson.ObjectIdHex(id)}, bson.M{"$set": m})
 		return m, err
-	} else {
-		return bson.M{}, errors.New("Invalid id provided")
 	}
+	return bson.M{}, errors.New("Invalid id provided")
 }
 
 // delete takes in a Object Id hex string for a document in the collection.
@@ -65,9 +65,8 @@ func (p *Pokemon) delete(id string) error {
 	if bson.IsObjectIdHex(id) == true {
 		err := p.C.RemoveId(bson.ObjectIdHex(id))
 		return err
-	} else {
-		return errors.New("Invalid id provided")
 	}
+	return errors.New("Invalid id provided")
 }
 
 // All is an exported method that returns all documents from the pokemon
@@ -89,9 +88,8 @@ func (p *Pokemon) Insert(m interface{}) (interface{}, error) {
 	pkm, ok := m.(model.Pokemon)
 	if !ok {
 		return model.Pokemon{}, errors.New("Failed to convert interface.")
-	} else {
-		return p.insert(&pkm)
 	}
+	return p.insert(&pkm)
 }
 
 // Update is a part of the CRUDController interface. It is a passthru to the
@@ -100,9 +98,8 @@ func (p *Pokemon) Update(id string, m interface{}) (interface{}, error) {
 	pkm, ok := m.(bson.M)
 	if !ok {
 		return bson.M{}, errors.New("Bad interface")
-	} else {
-		return p.update(id, pkm)
 	}
+	return p.update(id, pkm)
 }
 
 // Delete is a part of the CRUDController interface. it is a passthru to the
