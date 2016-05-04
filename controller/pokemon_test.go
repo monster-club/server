@@ -8,8 +8,7 @@ import (
 )
 
 func TestPokemonNew(t *testing.T) {
-	db := mangoSetup()
-	cont := NewPokemon(db)
+	_, cont := standardSetup()
 	reflection := reflect.TypeOf(cont)
 	if reflection.String() != "*controller.Pokemon" {
 		t.Error("The factory function created the wrong controller. Created:", reflection)
