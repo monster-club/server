@@ -172,6 +172,8 @@ func TestInsertPokemon(t *testing.T) {
 		if hex == "" {
 			t.Error("The inserted Pokemon should have an ID.", hex)
 		}
+	} else {
+		t.Error("Unable to create database connection:", err)
 	}
 }
 
@@ -207,6 +209,30 @@ func TestUpdatePokemon(t *testing.T) {
 		}
 		if found.DexNum == 0 {
 			t.Error("Document was mangled on update")
+		}
+	} else {
+		t.Error("Unable to create database connection:", err)
+	}
+}
+
+func TestDeletePokemon(t *testing.T) {
+	db, err := mangoSetup()
+	if err == nil {
+		defer db.DropDatabase()
+		cont := NewPokemon(db)
+		charmander := pokemonFactory()
+		ret, err := cont.Insert(charmander)
+		if err == nil {
+			pkm, ok := ret.(model.Pokemon)
+			if !ok {
+				t.Error("Couldn't convert struct")
+			}
+			err := cont.Delete(bson.ObjectId.Hex(pkm.ID))
+			if err != nil {
+				t.Error("An error occurred trying to delete the pokemon", err)
+			}
+		} else {
+			t.Error("Failed to insert pokemon")
 		}
 	} else {
 		t.Error("Unable to create database connection:", err)

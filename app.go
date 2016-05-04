@@ -21,6 +21,7 @@ func main() {
 	r.POST("/pokemon", router.Create(pkmCtrl))
 	r.GET("/pokemon/:id", router.GetOne(pkmCtrl))
 	r.PUT("/pokemon/:id", router.Update(pkmCtrl))
+	r.DELETE("/pokemon/:id", router.Delete(pkmCtrl))
 
 	r.Run()
 }

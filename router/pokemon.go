@@ -55,3 +55,14 @@ func Update(ctrl controller.CRUDController) func(c *gin.Context) {
 		}
 	}
 }
+
+func Delete(ctrl controller.CRUDController) func(c *gin.Context) {
+	return func(c *gin.Context) {
+		err := ctrl.Delete(c.Param("id"))
+		if err != nil {
+			c.JSON(400, gin.H{"error": err})
+		} else {
+			c.AbortWithStatus(204)
+		}
+	}
+}

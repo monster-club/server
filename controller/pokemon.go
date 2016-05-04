@@ -25,7 +25,7 @@ func (p *Pokemon) all() []model.Pokemon {
 func (p *Pokemon) find(id string) (model.Pokemon, error) {
 	if bson.IsObjectIdHex(id) == true {
 		var result model.Pokemon
-		err := p.C.Find(bson.M{"_id": bson.ObjectIdHex(id)}).One(&result)
+		err := p.C.FindId(bson.ObjectIdHex(id)).One(&result)
 		return result, err
 	} else {
 		return model.Pokemon{}, errors.New("Invalid id provided")
@@ -54,6 +54,19 @@ func (p *Pokemon) update(id string, m bson.M) (bson.M, error) {
 		return m, err
 	} else {
 		return bson.M{}, errors.New("Invalid id provided")
+	}
+}
+
+// delete takes in a Object Id hex string for a document in the collection.
+// if it is successful it will return nil, otherwise it will return a database
+// error. If an invalid hex string was given, it will return an error
+// indicating that.
+func (p *Pokemon) delete(id string) error {
+	if bson.IsObjectIdHex(id) == true {
+		err := p.C.RemoveId(bson.ObjectIdHex(id))
+		return err
+	} else {
+		return errors.New("Invalid id provided")
 	}
 }
 
@@ -90,4 +103,10 @@ func (p *Pokemon) Update(id string, m interface{}) (interface{}, error) {
 	} else {
 		return p.update(id, pkm)
 	}
+}
+
+// Delete is a part of the CRUDController interface. it is a passthru to the
+// undexported .delete call.
+func (p *Pokemon) Delete(id string) error {
+	return p.delete(id)
 }
