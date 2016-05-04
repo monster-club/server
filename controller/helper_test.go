@@ -6,9 +6,12 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-func mangoSetup() (*mgo.Database, error) {
+func mangoSetup() *mgo.Database {
 	sess, err := mgo.Dial("127.0.0.1")
-	return sess.DB("pokemonTest"), err
+	if err != nil {
+		panic(err)
+	}
+	return sess.DB("pokemonTest")
 }
 
 func testInsert(db *mgo.Database) model.Pokemon {
