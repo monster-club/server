@@ -5,9 +5,10 @@ import (
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 	"reflect"
-	"strconv"
 	"testing"
 )
+
+// "strconv"
 
 func mangoSetup() (*mgo.Database, error) {
 	sess, err := mgo.Dial("127.0.0.1")
@@ -193,19 +194,21 @@ func TestUpdatePokemon(t *testing.T) {
 		defer db.DropDatabase()
 		pkm := testInsertValid(db)
 		cont := NewPokemon(db)
-		res, err := cont.Update(bson.ObjectId.Hex(pkm.ID), model.Pokemon{Name: "Squirtle"})
+		_, err := cont.Update(bson.ObjectId.Hex(pkm.ID), bson.M{"name": "Squirtle"})
 		if err != nil {
 			t.Error("There should not have been a database error:", err)
 		}
-		newPkm, ok := res.(model.Pokemon)
-		if !ok {
-			t.Error("Result should be convertable to a Pokemon struct")
+		found, findErr := cont.find(bson.ObjectId.Hex(pkm.ID))
+		if findErr != nil {
+			t.Error("Database error finding updated pokemon")
 		}
-		if newPkm.Name != "Squirtle" {
-			t.Error("The model was not updated.")
+		if found.Name != "Squirtle" {
+			t.Error("Document was not updated")
 		}
-		if newPkm.DexNum == 0 {
-			t.Error("The update mangled existing data, expected "+strconv.Itoa(int(pkm.DexNum))+", got:", newPkm.DexNum)
+		if found.DexNum == 0 {
+			t.Error("Document was mangled on update")
 		}
+	} else {
+		t.Error("Unable to create database connection:", err)
 	}
 }

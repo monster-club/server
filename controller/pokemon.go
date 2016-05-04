@@ -48,12 +48,12 @@ func (p *Pokemon) insert(m *model.Pokemon) (model.Pokemon, error) {
 // update will change toe provided keys in the "m" variable. It will also
 // return an error, if there is an error on the database level during the
 // update, or if the id provided is not a valid ObjectId hex.
-func (p *Pokemon) update(id string, m *model.Pokemon) (model.Pokemon, error) {
+func (p *Pokemon) update(id string, m bson.M) (bson.M, error) {
 	if bson.IsObjectIdHex(id) == true {
-		err := p.C.Update(bson.M{"_id": bson.ObjectIdHex(id)}, m)
-		return *m, err
+		err := p.C.Update(bson.M{"_id": bson.ObjectIdHex(id)}, bson.M{"$set": m})
+		return m, err
 	} else {
-		return model.Pokemon{}, errors.New("Invalid id provided")
+		return bson.M{}, errors.New("Invalid id provided")
 	}
 }
 
@@ -84,11 +84,10 @@ func (p *Pokemon) Insert(m interface{}) (interface{}, error) {
 // Update is a part of the CRUDController interface. It is a passthru to the
 // unexported .update call.
 func (p *Pokemon) Update(id string, m interface{}) (interface{}, error) {
-	pkm, ok := m.(model.Pokemon)
+	pkm, ok := m.(bson.M)
 	if !ok {
-		return model.Pokemon{}, errors.New("Bad interface")
+		return bson.M{}, errors.New("Bad interface")
 	} else {
-		return p.update(id, &pkm)
+		return p.update(id, pkm)
 	}
-	return model.Pokemon{}, nil
 }
