@@ -20,6 +20,7 @@ func main() {
 	r.GET("/pokemon", router.GetAll(pkmCtrl))
 	r.POST("/pokemon", router.Create(pkmCtrl))
 	r.GET("/pokemon/:id", router.GetOne(pkmCtrl))
+	r.PUT("/pokemon/:id", router.Update(pkmCtrl))
 
 	r.Run()
 }
