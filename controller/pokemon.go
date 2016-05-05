@@ -25,18 +25,6 @@ func (p *Pokemon) update(id string, m bson.M) (bson.M, error) {
 	return bson.M{}, errors.New("Invalid id provided")
 }
 
-// delete takes in a Object Id hex string for a document in the collection.
-// if it is successful it will return nil, otherwise it will return a database
-// error. If an invalid hex string was given, it will return an error
-// indicating that.
-func (p *Pokemon) delete(id string) error {
-	if bson.IsObjectIdHex(id) == true {
-		err := p.C.RemoveId(bson.ObjectIdHex(id))
-		return err
-	}
-	return errors.New("Invalid id provided")
-}
-
 // All is part of the CRUDController interface.
 // All returns all documents from the controller's collection
 func (p *Pokemon) All() interface{} {
@@ -79,8 +67,15 @@ func (p *Pokemon) Update(id string, m interface{}) (interface{}, error) {
 	return p.update(id, pkm)
 }
 
-// Delete is a part of the CRUDController interface. it is a passthru to the
-// undexported .delete call.
+// Delete is a part of the CRUDController interface.
+// Delete takes in a Object Id hex string for a document in the collection.
+// If it is successful it will return nil, otherwise it will return a database
+// error. If an invalid hex string was given, it will return an error
+// indicating that.
 func (p *Pokemon) Delete(id string) error {
-	return p.delete(id)
+	if bson.IsObjectIdHex(id) == true {
+		err := p.C.RemoveId(bson.ObjectIdHex(id))
+		return err
+	}
+	return errors.New("Invalid id provided")
 }
