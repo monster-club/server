@@ -22,18 +22,6 @@ func (p *Pokemon) all() []model.Pokemon {
 	return results
 }
 
-// insert will create a new document in the collection for the given Pokemon
-// struct, provided the struct is valid. If the struct is invalid, or if there
-// is a database error trying to insert the data, an error will be returned.
-func (p *Pokemon) insert(m *model.Pokemon) (model.Pokemon, error) {
-	if m.Valid() == false {
-		return model.Pokemon{}, errors.New("Invalid data for creation.")
-	}
-	m.ID = bson.NewObjectId()
-	err := p.C.Insert(m)
-	return *m, err
-}
-
 // update will change toe provided keys in the "m" variable. It will also
 // return an error, if there is an error on the database level during the
 // update, or if the id provided is not a valid ObjectId hex.
@@ -76,14 +64,16 @@ func (p *Pokemon) Find(id string, m interface{}) (interface{}, error) {
 	return model.Pokemon{}, errors.New("Invalid id provided")
 }
 
-// Insert is a part of the CRUDController interface. It is a passthru for the
-// local "insert" method.
-func (p *Pokemon) Insert(m interface{}) (interface{}, error) {
-	pkm, ok := m.(model.Pokemon)
-	if !ok {
-		return model.Pokemon{}, errors.New("Failed to convert interface.")
+// Insert is a part of the CRUDController interface.
+// Insert will create a new document in the collection for the given document
+// provided the document is valid. If the document is invalid, or if there
+// is a database error trying to insert the data, an error will be returned.
+func (p *Pokemon) Insert(m model.Document) (model.Document, error) {
+	if m.Valid() == false {
+		return &model.Pokemon{}, errors.New("Invalid data for creation.")
 	}
-	return p.insert(&pkm)
+	err := p.C.Insert(m)
+	return m, err
 }
 
 // Update is a part of the CRUDController interface. It is a passthru to the

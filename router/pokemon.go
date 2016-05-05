@@ -24,13 +24,12 @@ func GetOne(ctrl controller.CRUDController, m model.Document) func(c *gin.Contex
 	}
 }
 
-func Create(ctrl controller.CRUDController) func(c *gin.Context) {
-	var json model.Pokemon
+func Create(ctrl controller.CRUDController, m model.Document) func(c *gin.Context) {
 	return func(c *gin.Context) {
-		if c.BindJSON(&json) == nil {
-			res, err := ctrl.Insert(json)
+		if c.BindJSON(&m) == nil {
+			res, err := ctrl.Insert(m)
 			if err != nil {
-				c.JSON(400, gin.H{"error": "Failed to insert data"})
+				c.JSON(400, gin.H{"error": err.Error()})
 			} else {
 				c.JSON(201, res)
 			}
