@@ -14,17 +14,6 @@ type Pokemon struct {
 	C *mgo.Collection
 }
 
-// update will change toe provided keys in the "m" variable. It will also
-// return an error, if there is an error on the database level during the
-// update, or if the id provided is not a valid ObjectId hex.
-func (p *Pokemon) update(id string, m bson.M) (bson.M, error) {
-	if bson.IsObjectIdHex(id) == true {
-		err := p.C.Update(bson.M{"_id": bson.ObjectIdHex(id)}, bson.M{"$set": m})
-		return m, err
-	}
-	return bson.M{}, errors.New("Invalid id provided")
-}
-
 // All is part of the CRUDController interface.
 // All returns all documents from the controller's collection
 func (p *Pokemon) All() interface{} {
@@ -57,14 +46,21 @@ func (p *Pokemon) Insert(m model.Document) (model.Document, error) {
 	return m, err
 }
 
-// Update is a part of the CRUDController interface. It is a passthru to the
-// unexported .update call.
-func (p *Pokemon) Update(id string, m interface{}) (interface{}, error) {
-	pkm, ok := m.(bson.M)
-	if !ok {
-		return bson.M{}, errors.New("Bad interface")
+// Update is a part of the CRUDController interface.
+// Update will do a full update of the selected document. Before writing, the
+// new document will check for validity. If the new document would be invalid,
+// Update will return an error. An error will also be returned in the case where
+// and invalid Object Id hex is provided. Finally, an error will also be
+// returned if there is an error writing to the database.
+func (p *Pokemon) Update(id string, m model.Document) (model.Document, error) {
+	if bson.IsObjectIdHex(id) == true {
+		if m.Valid() == true {
+			err := p.C.UpdateId(bson.ObjectIdHex(id), m)
+			return m, err
+		}
+		return &model.Pokemon{}, errors.New("Provided object is not valid")
 	}
-	return p.update(id, pkm)
+	return &model.Pokemon{}, errors.New("Invalid id provided")
 }
 
 // Delete is a part of the CRUDController interface.

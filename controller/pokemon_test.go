@@ -69,12 +69,17 @@ func TestFindPokemonDatabaseProblem(t *testing.T) {
 	}
 }
 
-func TestInsertPokemonThrowsAnErrorForInvalidStruct(t *testing.T) {
-	db, charmander, cont := standardInsertSetup()
+func TestInsertPokemonReturnsAnErrorForInvalidData(t *testing.T) {
+	db, _, cont := standardInsertSetup()
 	defer db.DropDatabase()
-	_, err := cont.Insert(&charmander)
+	newPkm := pokemonFactory()
+	newPkm.DexNum = 0
+	_, err := cont.Insert(&newPkm)
+	if newPkm.Valid() == true {
+		t.Error("Pokemon should be invalid")
+	}
 	if err == nil {
-		t.Error("An invalid struct should raise an error.", err)
+		t.Error("An error should have been raised for invalid data")
 	}
 }
 
@@ -100,7 +105,9 @@ func TestUpdatePokemon(t *testing.T) {
 	db, pkm, cont := standardInsertSetup()
 	var m model.Pokemon
 	defer db.DropDatabase()
-	_, err := cont.Update(bson.ObjectId.Hex(pkm.ID), bson.M{"name": "Squirtle"})
+	newPkm := pokemonFactory()
+	newPkm.Name = "Squirtle"
+	_, err := cont.Update(bson.ObjectId.Hex(pkm.ID), &newPkm)
 	if err != nil {
 		t.Error("There should not have been a database error:", err)
 	}
@@ -117,11 +124,45 @@ func TestUpdatePokemon(t *testing.T) {
 	}
 }
 
+func TestUpdateFailsWithBadId(t *testing.T) {
+	db, _, cont := standardInsertSetup()
+	defer db.DropDatabase()
+	newPkm := pokemonFactory()
+	newPkm.Name = "Bulbasaur"
+	_, err := cont.Update("lol totally a hex", &newPkm)
+	if err == nil {
+		t.Error("An error should have been raised for an invalid hex")
+	}
+}
+
+func TestUpdateFailsWithBadData(t *testing.T) {
+	db, pkm, cont := standardInsertSetup()
+	defer db.DropDatabase()
+	newPkm := pokemonFactory()
+	newPkm.DexNum = 0
+	_, err := cont.Update(bson.ObjectId.Hex(pkm.ID), &newPkm)
+	if newPkm.Valid() == true {
+		t.Error("Pokemon should be invalid")
+	}
+	if err == nil {
+		t.Error("An error should have been raised for invalid data")
+	}
+}
+
 func TestDeletePokemon(t *testing.T) {
 	db, charmander, cont := standardInsertSetup()
 	defer db.DropDatabase()
 	err := cont.Delete(bson.ObjectId.Hex(charmander.ID))
 	if err != nil {
 		t.Error("An error occurred trying to delete the pokemon", err)
+	}
+}
+
+func TestDeletePokemonReturnsAnErrorForBadIds(t *testing.T) {
+	db, _, cont := standardInsertSetup()
+	defer db.DropDatabase()
+	err := cont.Delete("abc123")
+	if err == nil {
+		t.Error("An error should have been returned when a invalid hex was provided")
 	}
 }
