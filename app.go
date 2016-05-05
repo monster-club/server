@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/pokemon-club/server/controller"
+	"github.com/pokemon-club/server/model"
 	"github.com/pokemon-club/server/router"
 	"gopkg.in/mgo.v2"
 )
@@ -17,10 +18,11 @@ func main() {
 	db := sess.DB("pokemon")
 	pkmCtrl := controller.NewPokemon(db)
 
+	var m model.Pokemon
 	r.GET("/pokemon", router.GetAll(pkmCtrl))
-	r.POST("/pokemon", router.Create(pkmCtrl))
-	r.GET("/pokemon/:id", router.GetOne(pkmCtrl))
-	r.PUT("/pokemon/:id", router.Update(pkmCtrl))
+	r.POST("/pokemon", router.Create(pkmCtrl, &m))
+	r.GET("/pokemon/:id", router.GetOne(pkmCtrl, &m))
+	r.PUT("/pokemon/:id", router.Update(pkmCtrl, &m))
 	r.DELETE("/pokemon/:id", router.Delete(pkmCtrl))
 
 	r.Run()

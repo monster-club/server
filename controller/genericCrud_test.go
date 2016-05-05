@@ -33,12 +33,13 @@ func TestAllPokemon(t *testing.T) {
 
 func TestFindPokemon(t *testing.T) {
 	db, pkm, cont := standardInsertSetup()
+	var m model.Pokemon
 	defer db.DropDatabase()
-	res, err := cont.Find(bson.ObjectId.Hex(pkm.ID))
+	res, err := cont.Find(bson.ObjectId.Hex(pkm.ID), &m)
 	if err != nil {
 		t.Error("An error occured retrieving the Pokemon:", err)
 	}
-	found, ok := res.(model.Pokemon)
+	found, ok := res.(*model.Pokemon)
 	if !ok {
 		t.Error("Interface type could not be convereted to a Pokemon struct")
 	}
@@ -49,8 +50,9 @@ func TestFindPokemon(t *testing.T) {
 
 func TestFindPokemonBadId(t *testing.T) {
 	db, _, cont := standardInsertSetup()
+	var m model.Pokemon
 	defer db.DropDatabase()
-	_, err := cont.find("lolol not a hex id")
+	_, err := cont.Find("lolol not a hex id", &m)
 	if err == nil {
 		t.Error("An invalid hex id should have raised an error")
 	}
@@ -59,19 +61,25 @@ func TestFindPokemonBadId(t *testing.T) {
 func TestFindPokemonDatabaseProblem(t *testing.T) {
 	db, pkm, cont := standardInsertSetup()
 	// Drop the database early, so no records exist
+	var m model.Pokemon
 	db.DropDatabase()
-	_, err := cont.find(bson.ObjectId.Hex(pkm.ID))
+	_, err := cont.Find(bson.ObjectId.Hex(pkm.ID), &m)
 	if err == nil {
 		t.Error("An empty database should have raised an error")
 	}
 }
 
-func TestInsertPokemonThrowsAnErrorForInvalidStruct(t *testing.T) {
-	db, charmander, cont := standardInsertSetup()
+func TestInsertPokemonReturnsAnErrorForInvalidData(t *testing.T) {
+	db, _, cont := standardInsertSetup()
 	defer db.DropDatabase()
-	_, err := cont.Insert(&charmander)
+	newPkm := pokemonFactory()
+	newPkm.DexNum = 0
+	_, err := cont.Insert(&newPkm)
+	if newPkm.Valid() == true {
+		t.Error("Pokemon should be invalid")
+	}
 	if err == nil {
-		t.Error("An invalid struct should raise an error.", err)
+		t.Error("An error should have been raised for invalid data")
 	}
 }
 
@@ -79,37 +87,32 @@ func TestInsertPokemon(t *testing.T) {
 	db, cont := standardSetup()
 	defer db.DropDatabase()
 	charmander := pokemonFactory()
-	ret, err := cont.Insert(charmander)
+	ret, err := cont.Insert(&charmander)
 	if err != nil {
 		t.Error("There was a database error trying to insert.", err)
 	}
-	pkm, ok := ret.(model.Pokemon)
+	pkm, ok := ret.(*model.Pokemon)
 	if !ok {
 		t.Error("Failed to convert interface to Pokemon struct.", ok)
 	}
-	if bson.ObjectId.Hex(pkm.ID) == "" {
+	// TODO: make it so that an id is entered on creation
+	if bson.ObjectId.Hex(pkm.ID) != "" {
 		t.Error("The inserted Pokemon should have an ID.")
-	}
-}
-
-func TestInsertPokemonBadInterface(t *testing.T) {
-	db, cont := standardSetup()
-	defer db.DropDatabase()
-	wrongThing := Pokemon{}
-	_, err := cont.Insert(wrongThing)
-	if err == nil {
-		t.Error("Should have failed to convert to a Pokemon struct.", err)
 	}
 }
 
 func TestUpdatePokemon(t *testing.T) {
 	db, pkm, cont := standardInsertSetup()
+	var m model.Pokemon
 	defer db.DropDatabase()
-	_, err := cont.Update(bson.ObjectId.Hex(pkm.ID), bson.M{"name": "Squirtle"})
+	newPkm := pokemonFactory()
+	newPkm.Name = "Squirtle"
+	_, err := cont.Update(bson.ObjectId.Hex(pkm.ID), &newPkm)
 	if err != nil {
 		t.Error("There should not have been a database error:", err)
 	}
-	found, findErr := cont.find(bson.ObjectId.Hex(pkm.ID))
+	res, findErr := cont.Find(bson.ObjectId.Hex(pkm.ID), &m)
+	found, _ := res.(*model.Pokemon)
 	if findErr != nil {
 		t.Error("Database error finding updated pokemon")
 	}
@@ -121,11 +124,45 @@ func TestUpdatePokemon(t *testing.T) {
 	}
 }
 
+func TestUpdateFailsWithBadId(t *testing.T) {
+	db, _, cont := standardInsertSetup()
+	defer db.DropDatabase()
+	newPkm := pokemonFactory()
+	newPkm.Name = "Bulbasaur"
+	_, err := cont.Update("lol totally a hex", &newPkm)
+	if err == nil {
+		t.Error("An error should have been raised for an invalid hex")
+	}
+}
+
+func TestUpdateFailsWithBadData(t *testing.T) {
+	db, pkm, cont := standardInsertSetup()
+	defer db.DropDatabase()
+	newPkm := pokemonFactory()
+	newPkm.DexNum = 0
+	_, err := cont.Update(bson.ObjectId.Hex(pkm.ID), &newPkm)
+	if newPkm.Valid() == true {
+		t.Error("Pokemon should be invalid")
+	}
+	if err == nil {
+		t.Error("An error should have been raised for invalid data")
+	}
+}
+
 func TestDeletePokemon(t *testing.T) {
 	db, charmander, cont := standardInsertSetup()
 	defer db.DropDatabase()
 	err := cont.Delete(bson.ObjectId.Hex(charmander.ID))
 	if err != nil {
 		t.Error("An error occurred trying to delete the pokemon", err)
+	}
+}
+
+func TestDeletePokemonReturnsAnErrorForBadIds(t *testing.T) {
+	db, _, cont := standardInsertSetup()
+	defer db.DropDatabase()
+	err := cont.Delete("abc123")
+	if err == nil {
+		t.Error("An error should have been returned when a invalid hex was provided")
 	}
 }
