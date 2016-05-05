@@ -39,11 +39,11 @@ func TestFindPokemon(t *testing.T) {
 	if err != nil {
 		t.Error("An error occured retrieving the Pokemon:", err)
 	}
-	found, ok := res.(bson.M)
+	found, ok := res.(*model.Pokemon)
 	if !ok {
 		t.Error("Interface type could not be convereted to a Pokemon struct")
 	}
-	if found["name"] != "Charmander" {
+	if found.Name != "Charmander" {
 		t.Error("Data did not come out of transformation intact.")
 	}
 }
@@ -105,14 +105,14 @@ func TestUpdatePokemon(t *testing.T) {
 		t.Error("There should not have been a database error:", err)
 	}
 	res, findErr := cont.Find(bson.ObjectId.Hex(pkm.ID), &m)
-	found, _ := res.(bson.M)
+	found, _ := res.(*model.Pokemon)
 	if findErr != nil {
 		t.Error("Database error finding updated pokemon")
 	}
-	if found["name"] != "Squirtle" {
+	if found.Name != "Squirtle" {
 		t.Error("Document was not updated")
 	}
-	if found["dex_num"] == 0 {
+	if found.DexNum == 0 {
 		t.Error("Document was mangled on update")
 	}
 }

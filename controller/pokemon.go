@@ -37,12 +37,12 @@ func (p *Pokemon) All() interface{} {
 // Find will retrieve a single document from the pokemon collection, and return
 // it as an interface. If the provided id is invalid, or an error occurs
 // in the database during retrieval, an error will be returned as well.
-func (p *Pokemon) Find(id string, m interface{}) (interface{}, error) {
+func (p *Pokemon) Find(id string, m model.Document) (model.Document, error) {
 	if bson.IsObjectIdHex(id) == true {
-		err := p.C.FindId(bson.ObjectIdHex(id)).One(&m)
+		err := p.C.FindId(bson.ObjectIdHex(id)).One(m)
 		return m, err
 	}
-	return model.Pokemon{}, errors.New("Invalid id provided")
+	return &model.Pokemon{}, errors.New("Invalid id provided")
 }
 
 // Insert is a part of the CRUDController interface.
