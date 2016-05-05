@@ -14,14 +14,6 @@ type Pokemon struct {
 	C *mgo.Collection
 }
 
-// all returns all documents from the pokemon collection as model.Pokemon
-// structs.
-func (p *Pokemon) all() []model.Pokemon {
-	var results []model.Pokemon
-	_ = p.C.Find(nil).All(&results)
-	return results
-}
-
 // update will change toe provided keys in the "m" variable. It will also
 // return an error, if there is an error on the database level during the
 // update, or if the id provided is not a valid ObjectId hex.
@@ -45,11 +37,12 @@ func (p *Pokemon) delete(id string) error {
 	return errors.New("Invalid id provided")
 }
 
-// All is an exported method that returns all documents from the pokemon
-// collection as an interface{}. This will need to be cast to a model.Pokemon.
 // All is part of the CRUDController interface.
+// All returns all documents from the controller's collection
 func (p *Pokemon) All() interface{} {
-	return p.all()
+	var results []model.Pokemon
+	_ = p.C.Find(nil).All(&results)
+	return results
 }
 
 // Find is a part of the CRUDController interface.
